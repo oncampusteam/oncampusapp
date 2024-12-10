@@ -13,7 +13,7 @@ class _WelcomeScreen3State extends State<WelcomeScreen3> {
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
-        body: Container(
+        body: SizedBox(
             height: MediaQuery.of(context).size.height,
             child: Stack(
               children: [
@@ -38,7 +38,7 @@ class _WelcomeScreen3State extends State<WelcomeScreen3> {
                                 letterSpacing: 1.5.w,
                                 color: Colors.white,
                                 fontWeight: FontWeight.w600,
-                                fontSize: 30.sp.clamp(0, 30),
+                                fontSize: 35.sp.clamp(0, 35),
                                 // fontStyle: FontStyle.normal
                                 fontFamily: "Poppins"),
                           ),

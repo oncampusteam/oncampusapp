@@ -39,7 +39,7 @@ class _WelcomeScreen2State extends State<WelcomeScreen2> {
                                 letterSpacing: 1.5.w,
                                 color: Colors.white,
                                 fontWeight: FontWeight.w600,
-                                fontSize: 30.sp.clamp(0, 30),
+                                fontSize: 35.sp.clamp(0, 35),
                                 // fontStyle: FontStyle.normal
                                 fontFamily: "Poppins")),
                         SizedBox(

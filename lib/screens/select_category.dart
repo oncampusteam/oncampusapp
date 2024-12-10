@@ -82,6 +82,7 @@ class _SelectCategoryState extends State<SelectCategory> {
                 SizedBox(height: 20),
                 GestureDetector(
                   onTap: () {
+                    print("Navigated to home page ");
                     Get.to(() => BottomNav(username: widget.username),
                         transition: Transition.fadeIn,
                         curve: Curves.easeIn,

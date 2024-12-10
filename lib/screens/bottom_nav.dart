@@ -1,3 +1,6 @@
+import 'package:firebase_core/firebase_core.dart';
+import 'package:on_campus/firebase/firestore_db.dart';
+import 'package:on_campus/firebase_options.dart';
 import 'package:on_campus/screens/Home%20Page%20Views/apartment.dart';
 import 'package:on_campus/screens/Home%20Page%20Views/compare.dart';
 import 'package:on_campus/screens/Home%20Page%20Views/home.dart';
@@ -32,6 +35,11 @@ class _BottomNavState extends State<BottomNav> {
     setState(() {
       currentpage = index;
     });
+  }
+
+  @override
+  void initState() {
+    super.initState();
   }
 
   @override

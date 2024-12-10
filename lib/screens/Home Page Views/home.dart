@@ -1,9 +1,16 @@
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:get/get.dart';
-import 'package:on_campus/classes/hostel.dart';
+import 'package:on_campus/firebase/classes.dart';
+import 'package:on_campus/firebase/firestore_db.dart';
+import 'package:on_campus/screens/hostels_detail.dart';
 import 'package:on_campus/screens/search.dart';
-import 'package:on_campus/widgets/hostel_category_widget.dart';
+import 'package:on_campus/widgets/homestel_hostel_category.dart';
+import 'package:on_campus/widgets/private_hostel_category.dart';
+import 'package:on_campus/widgets/school_hostel_category.dart';
 
 class Home extends StatefulWidget {
   final String username;
@@ -17,86 +24,43 @@ class _HomeState extends State<Home> {
   TextEditingController searchController = TextEditingController();
 
   bool favorite = false;
-  int selectedIndex = 4;
+  bool seeAllPopular = false;
+  bool seeAllTop = false;
 
-  List<Hostel> hostels = [
-    Hostel(
-        imageUrl: "assets/home/Hostel 1.png",
-        hotelName: "Albert-Acquah Hall",
-        location: "Kenyasi",
-        roomCapacity: 4,
-        price: "2,000",
-        rate: "4.5",
-        category: "Popular"),
-    Hostel(
-        imageUrl: "assets/home/Hostel 2.png",
-        hotelName: "Ultimate Hostel",
-        location: "Kenyasi",
-        roomCapacity: 4,
-        price: "4,000",
-        rate: "4.5",
-        category: "Popular"),
-    Hostel(
-        imageUrl: "assets/home/Hostel 3.png",
-        hotelName: "Adom Hostel",
-        location: "Kenyasi",
-        roomCapacity: 2,
-        price: "1,500",
-        rate: "4.5",
-        category: "Popular"),
-    Hostel(
-        imageUrl: "assets/home/Hostel 4.png",
-        hotelName: "Albert-Acquah Hall",
-        location: "Kenyasi",
-        roomCapacity: 4,
-        price: "2,000",
-        rate: "4.5",
-        category: "Popular"),
-  ];
+  List<Hostels> hostels = [];
+  List<Hostels> topHostels = [];
+  // Map<String, dynamic> myLocations = {};
+  final FirebaseFirestore db = FirebaseFirestore.instance;
 
-  List<Hostel> viewedHostels = [
-    Hostel(
-        imageUrl: "assets/home/Hostel 5.png",
-        hotelName: "Joemat Luxury Hostel",
-        location: "Kenyasi",
-        roomCapacity: 4,
-        price: "2,000",
-        rate: "4.7",
-        category: "Popular"),
-    Hostel(
-        imageUrl: "assets/home/Hostel 2.png",
-        hotelName: "Kings Hostel",
-        location: "Kenyasi",
-        roomCapacity: 4,
-        price: "2,000",
-        rate: "4.7",
-        category: "Popular"),
-    Hostel(
-        imageUrl: "assets/home/Hostel 4.png",
-        hotelName: "Albert-Acquah Hall",
-        location: "Kenyasi",
-        roomCapacity: 4,
-        price: "2,000",
-        rate: "4.5",
-        category: "Popular"),
-  ];
-  List<bool> favoritebool = [];
+  // List<bool> favoritebool = [];
   List<bool> viewedFavoritebool = [];
+  bool isLoading = true;
+  int num = 0;
+
+  Future<void> getPopular() async {
+    setState(() {
+      isLoading = true;
+    });
+    List<Hostels> awaitPopular = await FirestoreDb.instance.getPopular();
+    List<Hostels> awaitTop = await FirestoreDb.instance.getPrivateHostels();
+    awaitPopular.shuffle();
+    awaitTop.shuffle();
+    setState(() {
+      hostels = awaitPopular;
+      topHostels = awaitTop;
+      // myLocations = awaitLocations;
+      isLoading = false;
+    });
+  }
 
   @override
   void initState() {
     super.initState();
-    favoritebool = List.generate(
-      hostels.length,
-      (index) {
-        return favorite = false;
-      },
-    );
+    getPopular();
   }
 
   @override
   Widget build(BuildContext context) {
-    // selectedIndex = 4;
     return PopScope(
       canPop: false,
       child: SafeArea(
@@ -300,7 +264,7 @@ class _HomeState extends State<Home> {
                               GestureDetector(
                                 onTap: () {
                                   Get.to(
-                                      () => HostelCategoryWidget(
+                                      () => SchoolHostelCategory(
                                           username: widget.username),
                                       transition: Transition.fadeIn,
                                       duration:
@@ -341,66 +305,88 @@ class _HomeState extends State<Home> {
                                   ),
                                 ),
                               ),
-                              SizedBox(
-                                // height: 90.h,
-                                width: 105.w.clamp(0, 105),
-                                // color: Colors.blue,
-                                child: Column(
-                                  children: [
-                                    Image.asset(
-                                      "assets/home/Ellipse 4.png",
-                                      height: 70,
-                                      width: 70.w,
-                                    ),
-                                    SizedBox(
-                                      height: 4.h,
-                                    ),
-                                    Text(
-                                      "Private Hostel",
-                                      textAlign: TextAlign.center,
-                                      style: TextStyle(
-                                        fontSize: 16.sp.clamp(0, 16),
-                                        fontWeight: FontWeight.w500,
-                                        fontFamily: "Poppins",
-                                        letterSpacing: 0.15,
-                                        color:
-                                            const Color.fromARGB(180, 0, 0, 0),
+                              GestureDetector(
+                                onTap: () {
+                                  Get.to(
+                                      () => PrivateHostelCategory(
+                                          username: widget.username),
+                                      transition: Transition.fadeIn,
+                                      duration:
+                                          const Duration(milliseconds: 200),
+                                      curve: Curves.easeIn);
+                                },
+                                child: SizedBox(
+                                  // height: 90.h,
+                                  width: 105.w.clamp(0, 105),
+                                  // color: Colors.blue,
+                                  child: Column(
+                                    children: [
+                                      Image.asset(
+                                        "assets/home/Ellipse 4.png",
+                                        height: 70,
+                                        width: 70.w,
                                       ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              SizedBox(
-                                // height: 120.h,
-                                width: 105.w.clamp(0, 105),
-                                // color: Colors.blue,
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.start,
-                                  children: [
-                                    Image.asset(
-                                      "assets/home/Ellipse 5.png",
-                                      height: 70.h,
-                                      width: 70.w,
-                                    ),
-                                    SizedBox(
-                                      height: 4.h,
-                                    ),
-                                    Padding(
-                                      padding: EdgeInsets.only(left: 15.h),
-                                      child: Text(
-                                        "Homestel",
+                                      SizedBox(
+                                        height: 4.h,
+                                      ),
+                                      Text(
+                                        "Private Hostel",
                                         textAlign: TextAlign.center,
                                         style: TextStyle(
-                                          fontFamily: "Poppins",
                                           fontSize: 16.sp.clamp(0, 16),
                                           fontWeight: FontWeight.w500,
+                                          fontFamily: "Poppins",
                                           letterSpacing: 0.15,
                                           color: const Color.fromARGB(
                                               180, 0, 0, 0),
                                         ),
                                       ),
-                                    ),
-                                  ],
+                                    ],
+                                  ),
+                                ),
+                              ),
+                              GestureDetector(
+                                onTap: () {
+                                  Get.to(
+                                      () => HomestelHostelCategory(
+                                          username: widget.username),
+                                      transition: Transition.fadeIn,
+                                      duration:
+                                          const Duration(milliseconds: 200),
+                                      curve: Curves.easeIn);
+                                },
+                                child: SizedBox(
+                                  // height: 120.h,
+                                  width: 105.w.clamp(0, 105),
+                                  // color: Colors.blue,
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    children: [
+                                      Image.asset(
+                                        "assets/home/Ellipse 5.png",
+                                        height: 70.h,
+                                        width: 70.w,
+                                      ),
+                                      SizedBox(
+                                        height: 4.h,
+                                      ),
+                                      Padding(
+                                        padding: EdgeInsets.only(left: 15.h),
+                                        child: Text(
+                                          "Homestel",
+                                          textAlign: TextAlign.center,
+                                          style: TextStyle(
+                                            fontFamily: "Poppins",
+                                            fontSize: 16.sp.clamp(0, 16),
+                                            fontWeight: FontWeight.w500,
+                                            letterSpacing: 0.15,
+                                            color: const Color.fromARGB(
+                                                180, 0, 0, 0),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               )
                             ],
@@ -410,9 +396,9 @@ class _HomeState extends State<Home> {
                           height: 15,
                         ),
                         Container(
-                          margin: EdgeInsets.only(right: 25.h, left: 25.h),
+                          margin: EdgeInsets.only(left: 25.h),
                           // height: 20.h,
-                          width: 360.w,
+                          width: 361.w,
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
@@ -423,19 +409,33 @@ class _HomeState extends State<Home> {
                                     fontSize: 22.sp.clamp(0, 22),
                                     letterSpacing: 0.15),
                               ),
-                              GestureDetector(
-                                child: Padding(
-                                  padding: EdgeInsets.only(right: 15.h),
-                                  child: Text(
-                                    "see all",
-                                    style: TextStyle(
-                                      color: const Color.fromARGB(
-                                          255, 0, 239, 209),
-                                      fontWeight: FontWeight.w500,
-                                      fontSize: 16.sp.clamp(0, 16),
+                              Padding(
+                                padding: EdgeInsets.only(right: 15),
+                                child: TextButton(
+                                    style: ButtonStyle(
+                                      backgroundColor: WidgetStateProperty.all(
+                                        Color.fromRGBO(0, 239, 209, .07),
+                                      ),
+                                      overlayColor: WidgetStateProperty.all(
+                                        Color.fromRGBO(0, 239, 209, .5),
+                                      ),
+                                      animationDuration: Duration(seconds: 2),
                                     ),
-                                  ),
-                                ),
+                                    isSemanticButton: true,
+                                    child: Text(
+                                      seeAllPopular ? "see less" : "see all",
+                                      style: TextStyle(
+                                        color: const Color.fromARGB(
+                                            255, 0, 239, 209),
+                                        fontWeight: FontWeight.w500,
+                                        fontSize: 16.sp.clamp(0, 16),
+                                      ),
+                                    ),
+                                    onPressed: () {
+                                      setState(() {
+                                        seeAllPopular = !seeAllPopular;
+                                      });
+                                    }),
                               )
                             ],
                           ),
@@ -443,348 +443,430 @@ class _HomeState extends State<Home> {
                         SizedBox(
                           height: 15.h,
                         ),
-                        SizedBox(
-                          height: 225,
-                          width: MediaQuery.of(context).size.width,
-                          child: ListView.builder(
-                            physics: const BouncingScrollPhysics(),
-                            scrollDirection: Axis.horizontal,
-                            itemCount: hostels.length - 1,
-                            itemBuilder: (context, index) {
-                              if (hostels[index].category == "Popular") {
-                                return Row(
-                                  children: [
-                                    SizedBox(
-                                      width: index == 0 ? 25.h : 15.h,
-                                    ),
-                                    Container(
-                                      child: Column(
-                                        // mainAxisAlignment: MainAxisAlignment.start,
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
+                        isLoading
+                            ? Center(
+                                child: SpinKitThreeBounce(
+                                  color: const Color.fromARGB(255, 0, 239, 209),
+                                  size: 50.0,
+                                ),
+                              )
+                            : Padding(
+                                padding: const EdgeInsets.only(left: 15.0),
+                                child: SizedBox(
+                                  height: 225,
+                                  // width: MediaQuery.of(context).size.width,
+                                  width: 400,
+                                  child: ListView.builder(
+                                    physics: const BouncingScrollPhysics(),
+                                    scrollDirection: Axis.horizontal,
+                                    itemCount:
+                                        seeAllPopular ? hostels.length : 5,
+                                    itemBuilder: (context, index) {
+                                      Hostels hostel = hostels[index];
+                                      String? string = hostel.hostel_images?[0];
+                                      return Row(
                                         children: [
-                                          Container(
-                                            // margin: EdgeInsets.only(right: 10.h),
-                                            height: 145,
-                                            width: 330.w.clamp(0, 330),
-                                            decoration: BoxDecoration(
-                                              // color: Colors.black,
-                                              borderRadius: BorderRadius.only(
-                                                topLeft: Radius.circular(12.r),
-                                                topRight: Radius.circular(12.r),
-                                                bottomLeft:
-                                                    Radius.circular(12.r),
-                                                bottomRight:
-                                                    Radius.circular(12.r),
-                                              ),
-                                            ),
-                                            child: Stack(
-                                              children: [
-                                                Positioned(
-                                                  top: 0,
-                                                  right: 0,
-                                                  left: 0,
-                                                  child: ClipRRect(
-                                                    borderRadius:
-                                                        BorderRadius.only(
-                                                      topLeft:
-                                                          Radius.circular(12.r),
-                                                      topRight:
-                                                          Radius.circular(12.r),
-                                                      bottomLeft:
-                                                          Radius.circular(12.r),
-                                                      bottomRight:
-                                                          Radius.circular(12.r),
-                                                    ),
-                                                    child: Image.asset(
-                                                        hostels[index].imageUrl,
-                                                        height: 145,
-                                                        width:
-                                                            330.w.clamp(0, 330),
-                                                        fit: BoxFit.cover),
-                                                  ),
-                                                ),
-                                                Positioned(
-                                                  top: 5.h,
-                                                  right: 5.h,
-                                                  // left: 0,
-                                                  child: GestureDetector(
-                                                    onTap: () {
-                                                      setState(
-                                                        () {
-                                                          favoritebool[index] =
-                                                              !favoritebool[
-                                                                  index];
-                                                        },
-                                                      );
-                                                    },
-                                                    child: Container(
-                                                      height: 35.h,
-                                                      width: 35.w,
-                                                      decoration:
-                                                          const BoxDecoration(
-                                                        color: Colors.white,
-                                                        shape: BoxShape.circle,
-                                                      ),
-                                                      child: Icon(
-                                                        size: 20.h,
-                                                        favoritebool[index]
-                                                            ? Icons
-                                                                .favorite_outlined
-                                                            : Icons
-                                                                .favorite_border_outlined,
-                                                        color: const Color
-                                                            .fromARGB(
-                                                            255, 0, 239, 209),
-                                                      ),
-                                                    ),
-                                                  ),
-                                                ),
-                                                Positioned(
-                                                  top: 0,
-                                                  left: 0,
-                                                  child: Container(
-                                                    padding: EdgeInsets.only(
-                                                        left: 5, right: 5),
-                                                    height: 16.h,
-                                                    // width: 45.w,
+                                          GestureDetector(
+                                            onTap: () {
+                                              Get.to(
+                                                () => HostelDetails(
+                                                    username: widget.username,
+                                                    hostel: hostel),
+                                                transition: Transition.fadeIn,
+                                                duration: const Duration(
+                                                    milliseconds: 800),
+                                                curve: Curves.easeIn,
+                                              );
+                                            },
+                                            child: Container(
+                                              child: Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  Container(
+                                                    height: 145,
+                                                    width: 330.w.clamp(0, 330),
                                                     decoration: BoxDecoration(
-                                                      color:
-                                                          const Color.fromRGBO(
-                                                              50, 50, 50, 0.5),
+                                                      // color: Colors.black,
                                                       borderRadius:
                                                           BorderRadius.only(
-                                                        bottomRight:
-                                                            Radius.circular(
-                                                                12.r),
                                                         topLeft:
                                                             Radius.circular(
                                                                 12.r),
+                                                        topRight:
+                                                            Radius.circular(
+                                                                12.r),
+                                                        bottomLeft:
+                                                            Radius.circular(
+                                                                12.r),
+                                                        bottomRight:
+                                                            Radius.circular(
+                                                                12.r),
                                                       ),
                                                     ),
-                                                    child: Text(
-                                                      hostels[index].category,
-                                                      style: TextStyle(
-                                                          fontSize: 12
-                                                              .sp
-                                                              .clamp(0, 12),
-                                                          fontWeight:
-                                                              FontWeight.w500,
-                                                          fontFamily: "Roboto"),
+                                                    child: Stack(
+                                                      children: [
+                                                        Positioned(
+                                                          top: 0,
+                                                          right: 0,
+                                                          left: 0,
+                                                          child: ClipRRect(
+                                                              borderRadius:
+                                                                  BorderRadius
+                                                                      .only(
+                                                                topLeft: Radius
+                                                                    .circular(
+                                                                        12.r),
+                                                                topRight: Radius
+                                                                    .circular(
+                                                                        12.r),
+                                                                bottomLeft: Radius
+                                                                    .circular(
+                                                                        12.r),
+                                                                bottomRight: Radius
+                                                                    .circular(
+                                                                        12.r),
+                                                              ),
+                                                              child:
+                                                                  CachedNetworkImage(
+                                                                imageUrl:
+                                                                    string ??
+                                                                        "",
+                                                                height: 145,
+                                                                width: 330
+                                                                    .w
+                                                                    .clamp(
+                                                                        0, 330),
+                                                                fit: BoxFit
+                                                                    .cover,
+                                                                placeholder: (context,
+                                                                        url) =>
+                                                                    SpinKitThreeBounce(
+                                                                  color: const Color
+                                                                      .fromARGB(
+                                                                      255,
+                                                                      0,
+                                                                      239,
+                                                                      209),
+                                                                  size: 50.0,
+                                                                ),
+                                                                errorWidget: (context,
+                                                                        url,
+                                                                        error) =>
+                                                                    Icon(Icons
+                                                                        .error),
+                                                              )),
+                                                        ),
+                                                        Positioned(
+                                                          top: 5.h,
+                                                          right: 5.h,
+                                                          // left: 0,
+                                                          child:
+                                                              GestureDetector(
+                                                            onTap: () {
+                                                              setState(
+                                                                () {
+                                                                  // favoritebool[
+                                                                  //         index] =
+                                                                  //     !favoritebool[
+                                                                  //         index];
+                                                                },
+                                                              );
+                                                            },
+                                                            child: Container(
+                                                              height: 35.h,
+                                                              width: 35.w,
+                                                              decoration:
+                                                                  const BoxDecoration(
+                                                                color: Colors
+                                                                    .white,
+                                                                shape: BoxShape
+                                                                    .circle,
+                                                              ),
+                                                              child: Icon(
+                                                                size: 20.h,
+                                                                hostel.ispopular!
+                                                                    ? Icons
+                                                                        .favorite_outlined
+                                                                    : Icons
+                                                                        .favorite_border_outlined,
+                                                                color: const Color
+                                                                    .fromARGB(
+                                                                    255,
+                                                                    0,
+                                                                    239,
+                                                                    209),
+                                                              ),
+                                                            ),
+                                                          ),
+                                                        ),
+                                                        Positioned(
+                                                          top: 0,
+                                                          left: 0,
+                                                          child: Container(
+                                                            padding:
+                                                                EdgeInsets.only(
+                                                                    left: 5,
+                                                                    right: 5),
+                                                            height: 16.h,
+                                                            // width: 45.w,
+                                                            decoration:
+                                                                BoxDecoration(
+                                                              color: const Color
+                                                                  .fromRGBO(50,
+                                                                  50, 50, 0.5),
+                                                              borderRadius:
+                                                                  BorderRadius
+                                                                      .only(
+                                                                bottomRight: Radius
+                                                                    .circular(
+                                                                        12.r),
+                                                                topLeft: Radius
+                                                                    .circular(
+                                                                        12.r),
+                                                              ),
+                                                            ),
+                                                            child: Text(
+                                                              hostel.ispopular!
+                                                                  ? "popular"
+                                                                  : "",
+                                                              // "",
+                                                              style: TextStyle(
+                                                                  fontSize: 12
+                                                                      .sp
+                                                                      .clamp(0,
+                                                                          12),
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .w500,
+                                                                  fontFamily:
+                                                                      "Roboto"),
+                                                            ),
+                                                          ),
+                                                        ),
+                                                      ],
                                                     ),
                                                   ),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                          SizedBox(height: 10),
-                                          SizedBox(
-                                            width: 330.w.clamp(0, 330),
-                                            child: Row(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment
-                                                      .spaceBetween,
-                                              children: [
-                                                Column(
-                                                  crossAxisAlignment:
-                                                      CrossAxisAlignment.start,
-                                                  children: [
-                                                    Text(
-                                                      hostels[index].hotelName,
-                                                      style: TextStyle(
-                                                        fontFamily: "Poppins",
-                                                        fontWeight:
-                                                            FontWeight.w600,
-                                                        fontSize:
-                                                            20.sp.clamp(0, 22),
-                                                      ),
-                                                    ),
-                                                    Row(
+                                                  SizedBox(height: 10),
+                                                  SizedBox(
+                                                    width: 330.w.clamp(0, 330),
+                                                    child: Row(
                                                       mainAxisAlignment:
                                                           MainAxisAlignment
                                                               .spaceBetween,
                                                       children: [
-                                                        Row(
+                                                        Column(
+                                                          crossAxisAlignment:
+                                                              CrossAxisAlignment
+                                                                  .start,
                                                           children: [
-                                                            Image.asset(
-                                                              "assets/home/location.png",
-                                                              height: 24,
-                                                              width: 24
-                                                                  .sp
-                                                                  .clamp(0, 24),
-                                                            ),
                                                             Text(
-                                                              hostels[index]
-                                                                  .location,
+                                                              hostel.name,
                                                               style: TextStyle(
-                                                                fontSize: 18
-                                                                    .sp
-                                                                    .clamp(
-                                                                        0, 18),
                                                                 fontFamily:
                                                                     "Poppins",
                                                                 fontWeight:
                                                                     FontWeight
-                                                                        .w500,
-                                                                letterSpacing:
-                                                                    0.15.w,
-                                                                color: const Color(
-                                                                    0xFF323232),
+                                                                        .w600,
+                                                                fontSize: 20
+                                                                    .sp
+                                                                    .clamp(
+                                                                        0, 22),
                                                               ),
+                                                            ),
+                                                            Row(
+                                                              mainAxisAlignment:
+                                                                  MainAxisAlignment
+                                                                      .spaceBetween,
+                                                              children: [
+                                                                Row(
+                                                                  children: [
+                                                                    Image.asset(
+                                                                      "assets/home/location.png",
+                                                                      height:
+                                                                          24,
+                                                                      width: 24
+                                                                          .sp
+                                                                          .clamp(
+                                                                              0,
+                                                                              24),
+                                                                    ),
+                                                                    Text(
+                                                                      "${hostel.city}",
+                                                                      style:
+                                                                          TextStyle(
+                                                                        fontSize: 18
+                                                                            .sp
+                                                                            .clamp(0,
+                                                                                18),
+                                                                        fontFamily:
+                                                                            "Poppins",
+                                                                        fontWeight:
+                                                                            FontWeight.w500,
+                                                                        letterSpacing:
+                                                                            0.15.w,
+                                                                        color: const Color(
+                                                                            0xFF323232),
+                                                                      ),
+                                                                    )
+                                                                  ],
+                                                                ),
+                                                                SizedBox(
+                                                                    width: 5),
+                                                                Row(
+                                                                  children: [
+                                                                    Image.asset(
+                                                                      "assets/home/roomIcon.png",
+                                                                      height:
+                                                                          15.h,
+                                                                      width:
+                                                                          22.w,
+                                                                    ),
+                                                                    Text(
+                                                                      "  ${hostel.available_rooms} in a room",
+                                                                      style:
+                                                                          TextStyle(
+                                                                        fontSize: 16
+                                                                            .sp
+                                                                            .clamp(0,
+                                                                                16),
+                                                                        fontFamily:
+                                                                            "Poppins",
+                                                                        letterSpacing:
+                                                                            0.15.w,
+                                                                        fontWeight:
+                                                                            FontWeight.w500,
+                                                                        color: const Color(
+                                                                            0xFF323232),
+                                                                      ),
+                                                                    )
+                                                                  ],
+                                                                )
+                                                              ],
                                                             )
                                                           ],
                                                         ),
-                                                        SizedBox(width: 5),
-                                                        Row(
-                                                          children: [
-                                                            Image.asset(
-                                                              "assets/home/roomIcon.png",
-                                                              height: 15.h,
-                                                              width: 22.w,
+                                                        Expanded(
+                                                          child: Container(
+                                                            // color: Colors.red,
+                                                            child: Column(
+                                                              crossAxisAlignment:
+                                                                  CrossAxisAlignment
+                                                                      .end,
+                                                              children: [
+                                                                Text(
+                                                                  "start from",
+                                                                  style:
+                                                                      TextStyle(
+                                                                    fontWeight:
+                                                                        FontWeight
+                                                                            .w500,
+                                                                    fontSize: 12
+                                                                        .sp
+                                                                        .clamp(
+                                                                            0,
+                                                                            12),
+                                                                    color: const Color(
+                                                                        0xFF323232),
+                                                                  ),
+                                                                ),
+                                                                Row(
+                                                                  children: [
+                                                                    Text(
+                                                                      "₵${hostel.amt_per_year}",
+                                                                      style:
+                                                                          TextStyle(
+                                                                        fontFamily:
+                                                                            "Inter",
+                                                                        fontWeight:
+                                                                            FontWeight.bold,
+                                                                        fontSize: 16
+                                                                            .sp
+                                                                            .clamp(0,
+                                                                                16),
+                                                                        // letterSpacing:
+                                                                        //     0.15,
+                                                                        color: const Color(
+                                                                            0xFF323232),
+                                                                      ),
+                                                                    ),
+                                                                    Expanded(
+                                                                      child:
+                                                                          Text(
+                                                                        "/Ac. year",
+                                                                        style:
+                                                                            TextStyle(
+                                                                          color:
+                                                                              const Color(0xFF323232),
+                                                                          fontWeight:
+                                                                              FontWeight.w500,
+                                                                          fontFamily:
+                                                                              "Poppins",
+                                                                          fontSize: 10.sp.clamp(
+                                                                              0,
+                                                                              10),
+                                                                        ),
+                                                                      ),
+                                                                    ),
+                                                                  ],
+                                                                ),
+                                                                // SizedBox(
+                                                                //   height: 10.h,
+                                                                // ),
+                                                                Container(
+                                                                  child: Row(
+                                                                    mainAxisAlignment:
+                                                                        MainAxisAlignment
+                                                                            .end,
+                                                                    children: [
+                                                                      Icon(
+                                                                        Icons
+                                                                            .star_outline,
+                                                                        size: 17.h.clamp(
+                                                                            0,
+                                                                            17),
+                                                                        color: const Color
+                                                                            .fromARGB(
+                                                                          255,
+                                                                          0,
+                                                                          239,
+                                                                          209,
+                                                                        ),
+                                                                      ),
+                                                                      Text(
+                                                                        "",
+                                                                        style:
+                                                                            TextStyle(
+                                                                          fontSize: 15.sp.clamp(
+                                                                              0,
+                                                                              15),
+                                                                          color:
+                                                                              const Color(0xFF323232),
+                                                                        ),
+                                                                      ),
+                                                                    ],
+                                                                  ),
+                                                                ),
+                                                              ],
                                                             ),
-                                                            Text(
-                                                              "  ${hostels[index].roomCapacity} in a room",
-                                                              style: TextStyle(
-                                                                fontSize: 16
-                                                                    .sp
-                                                                    .clamp(
-                                                                        0, 16),
-                                                                fontFamily:
-                                                                    "Poppins",
-                                                                letterSpacing:
-                                                                    0.15.w,
-                                                                fontWeight:
-                                                                    FontWeight
-                                                                        .w500,
-                                                                color: const Color(
-                                                                    0xFF323232),
-                                                              ),
-                                                            )
-                                                          ],
-                                                        )
-                                                      ],
-                                                    )
-                                                  ],
-                                                ),
-                                                Expanded(
-                                                  child: Container(
-                                                    // color: Colors.red,
-                                                    child: Column(
-                                                      crossAxisAlignment:
-                                                          CrossAxisAlignment
-                                                              .end,
-                                                      children: [
-                                                        Text(
-                                                          "start from",
-                                                          style: TextStyle(
-                                                            fontWeight:
-                                                                FontWeight.w500,
-                                                            fontSize: 12
-                                                                .sp
-                                                                .clamp(0, 12),
-                                                            color: const Color(
-                                                                0xFF323232),
                                                           ),
                                                         ),
-                                                        Row(children: [
-                                                          Text(
-                                                            "₵${hostels[index].price}",
-                                                            style: TextStyle(
-                                                              fontFamily:
-                                                                  "Inter",
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .bold,
-                                                              fontSize: 16
-                                                                  .sp
-                                                                  .clamp(0, 16),
-                                                              // letterSpacing:
-                                                              //     0.15,
-                                                              color: const Color(
-                                                                  0xFF323232),
-                                                            ),
-                                                          ),
-                                                          Expanded(
-                                                            child: Text(
-                                                              "/Ac. year",
-                                                              style: TextStyle(
-                                                                color: const Color(
-                                                                    0xFF323232),
-                                                                fontWeight:
-                                                                    FontWeight
-                                                                        .w500,
-                                                                fontFamily:
-                                                                    "Poppins",
-                                                                fontSize: 10
-                                                                    .sp
-                                                                    .clamp(
-                                                                        0, 10),
-                                                              ),
-                                                            ),
-                                                          ),
-                                                        ]),
-                                                        // SizedBox(
-                                                        //   height: 10.h,
-                                                        // ),
-                                                        Container(
-                                                          child: Row(
-                                                            mainAxisAlignment:
-                                                                MainAxisAlignment
-                                                                    .end,
-                                                            children: [
-                                                              Icon(
-                                                                Icons
-                                                                    .star_outline,
-                                                                size: 17
-                                                                    .h
-                                                                    .clamp(
-                                                                        0, 17),
-                                                                color: const Color
-                                                                    .fromARGB(
-                                                                  255,
-                                                                  0,
-                                                                  239,
-                                                                  209,
-                                                                ),
-                                                              ),
-                                                              Text(
-                                                                hostels[index]
-                                                                    .rate,
-                                                                style:
-                                                                    TextStyle(
-                                                                  fontSize: 15
-                                                                      .sp
-                                                                      .clamp(0,
-                                                                          15),
-                                                                  color: const Color(
-                                                                      0xFF323232),
-                                                                ),
-                                                              )
-                                                            ],
-                                                          ),
-                                                        )
                                                       ],
                                                     ),
                                                   ),
-                                                )
-                                              ],
+                                                ],
+                                              ),
                                             ),
                                           ),
+                                          const SizedBox(width: 20),
                                         ],
-                                      ),
-                                    )
-                                  ],
-                                );
-                              }
-                              return null;
-                            },
-                          ),
-                        ),
+                                      );
+                                    },
+                                  ),
+                                ),
+                              ),
                         Container(
-                          // color: Colors.red,
                           margin: EdgeInsets.only(left: 25.h),
-                          // height: 20.h,
-                          // width: 330.w,
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
@@ -795,19 +877,33 @@ class _HomeState extends State<Home> {
                                     fontSize: 20.sp.clamp(0, 20),
                                     letterSpacing: 0.15),
                               ),
-                              GestureDetector(
-                                child: Padding(
-                                  padding: EdgeInsets.only(right: 15.h),
-                                  child: Text(
-                                    "see all",
-                                    style: TextStyle(
-                                      color: const Color.fromARGB(
-                                          255, 0, 239, 209),
-                                      fontWeight: FontWeight.w500,
-                                      fontSize: 16.sp.clamp(0, 16),
+                              Padding(
+                                padding: EdgeInsets.only(right: 15.h),
+                                child: TextButton(
+                                    style: ButtonStyle(
+                                      backgroundColor: WidgetStateProperty.all(
+                                        Color.fromRGBO(0, 239, 209, .07),
+                                      ),
+                                      overlayColor: WidgetStateProperty.all(
+                                        Color.fromRGBO(0, 239, 209, .5),
+                                      ),
+                                      animationDuration: Duration(seconds: 2),
                                     ),
-                                  ),
-                                ),
+                                    isSemanticButton: true,
+                                    child: Text(
+                                      seeAllTop ? "see less" : "see all",
+                                      style: TextStyle(
+                                        color: const Color.fromARGB(
+                                            255, 0, 239, 209),
+                                        fontWeight: FontWeight.w500,
+                                        fontSize: 16.sp.clamp(0, 16),
+                                      ),
+                                    ),
+                                    onPressed: () {
+                                      setState(() {
+                                        seeAllTop = !seeAllTop;
+                                      });
+                                    }),
                               )
                             ],
                           ),
@@ -815,44 +911,46 @@ class _HomeState extends State<Home> {
                         SizedBox(
                           height: 15.h,
                         ),
-                        SizedBox(
-                          height: 255 * (hostels.length - 1),
-                          width: MediaQuery.of(context).size.width,
-                          child: ListView.builder(
-                            physics: const BouncingScrollPhysics(),
-                            scrollDirection: Axis.vertical,
-                            itemCount: hostels.length - 1,
-                            itemBuilder: (context, index) {
-                              if (hostels[index].category == "Popular") {
-                                return Center(
-                                  child: Container(
-                                    // color: Colors.green,
-                                    child: Column(
-                                      // mainAxisAlignment: MainAxisAlignment.start,
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Container(
-                                          // margin: EdgeInsets.only(right: 10.h),
-                                          height: 145,
-                                          width: 330.w.clamp(0, 330),
-                                          decoration: BoxDecoration(
-                                            // color: Colors.black,
-                                            borderRadius: BorderRadius.only(
-                                              topLeft: Radius.circular(12.r),
-                                              topRight: Radius.circular(12.r),
-                                              bottomLeft: Radius.circular(12.r),
-                                              bottomRight:
-                                                  Radius.circular(12.r),
-                                            ),
-                                          ),
-                                          child: Stack(
+                        isLoading
+                            ? Center(
+                                child: SpinKitThreeBounce(
+                                  color: const Color.fromARGB(255, 0, 239, 209),
+                                  size: 50.0,
+                                ),
+                              )
+                            : SingleChildScrollView(
+                                child: Column(
+                                    children: List.generate(
+                                        seeAllTop ? topHostels.length : 5,
+                                        (index) {
+                                  Hostels topHostel = topHostels[index];
+                                  String? string =
+                                      topHostels[index].hostel_images?[0];
+                                  return GestureDetector(
+                                    onTap: () {
+                                      Get.to(
+                                        () => HostelDetails(
+                                            username: widget.username,
+                                            hostel: topHostel),
+                                        transition: Transition.fadeIn,
+                                        duration:
+                                            const Duration(milliseconds: 800),
+                                        curve: Curves.easeIn,
+                                      );
+                                    },
+                                    child: ListTile(
+                                      title: Center(
+                                        child: Container(
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
                                             children: [
-                                              Positioned(
-                                                top: 0,
-                                                right: 0,
-                                                left: 0,
-                                                child: ClipRRect(
+                                              Container(
+                                                // margin: EdgeInsets.only(right: 10.h),
+                                                height: 145,
+                                                width: 330.w.clamp(0, 330),
+                                                decoration: BoxDecoration(
+                                                  // color: Colors.black,
                                                   borderRadius:
                                                       BorderRadius.only(
                                                     topLeft:
@@ -864,277 +962,347 @@ class _HomeState extends State<Home> {
                                                     bottomRight:
                                                         Radius.circular(12.r),
                                                   ),
-                                                  child: Image.asset(
-                                                      hostels[index].imageUrl,
-                                                      height: 145,
-                                                      width:
-                                                          330.w.clamp(0, 330),
-                                                      fit: BoxFit.cover),
                                                 ),
-                                              ),
-                                              Positioned(
-                                                top: 5.h,
-                                                right: 5.h,
-                                                // left: 0,
-                                                child: GestureDetector(
-                                                  onTap: () {
-                                                    setState(
-                                                      () {
-                                                        favoritebool[index] =
-                                                            !favoritebool[
-                                                                index];
-                                                      },
-                                                    );
-                                                  },
-                                                  child: Container(
-                                                    height: 35.h,
-                                                    width: 35.w,
-                                                    decoration:
-                                                        const BoxDecoration(
-                                                      color: Colors.white,
-                                                      shape: BoxShape.circle,
-                                                    ),
-                                                    child: Icon(
-                                                      size: 20.h,
-                                                      favoritebool[index]
-                                                          ? Icons
-                                                              .favorite_outlined
-                                                          : Icons
-                                                              .favorite_border_outlined,
-                                                      color:
-                                                          const Color.fromARGB(
-                                                              255, 0, 239, 209),
-                                                    ),
-                                                  ),
-                                                ),
-                                              ),
-                                              Positioned(
-                                                top: 0,
-                                                left: 0,
-                                                child: Container(
-                                                  padding: EdgeInsets.only(
-                                                      left: 5, right: 5),
-                                                  height: 16.h,
-                                                  // width: 45.w,
-                                                  decoration: BoxDecoration(
-                                                    color: const Color.fromRGBO(
-                                                        50, 50, 50, 0.5),
-                                                    borderRadius:
-                                                        BorderRadius.only(
-                                                      bottomRight:
-                                                          Radius.circular(12.r),
-                                                      topLeft:
-                                                          Radius.circular(12.r),
-                                                    ),
-                                                  ),
-                                                  child: Text(
-                                                    hostels[index].category,
-                                                    style: TextStyle(
-                                                        fontSize:
-                                                            12.sp.clamp(0, 12),
-                                                        fontWeight:
-                                                            FontWeight.w500,
-                                                        fontFamily: "Roboto"),
-                                                  ),
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                        SizedBox(height: 20),
-                                        SizedBox(
-                                          width: 330.w.clamp(0, 330),
-                                          child: Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.spaceBetween,
-                                            children: [
-                                              Column(
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.start,
-                                                children: [
-                                                  Text(
-                                                    hostels[index].hotelName,
-                                                    style: TextStyle(
-                                                      fontFamily: "Poppins",
-                                                      fontWeight:
-                                                          FontWeight.w600,
-                                                      fontSize:
-                                                          20.sp.clamp(0, 22),
-                                                    ),
-                                                  ),
-                                                  Row(
-                                                    mainAxisAlignment:
-                                                        MainAxisAlignment
-                                                            .spaceBetween,
-                                                    children: [
-                                                      Row(
-                                                        children: [
-                                                          Image.asset(
-                                                            "assets/home/location.png",
-                                                            height: 24,
-                                                            width: 24
-                                                                .sp
-                                                                .clamp(0, 24),
+                                                child: Stack(
+                                                  children: [
+                                                    Positioned(
+                                                      top: 0,
+                                                      right: 0,
+                                                      left: 0,
+                                                      child: ClipRRect(
+                                                        borderRadius:
+                                                            BorderRadius.only(
+                                                          topLeft:
+                                                              Radius.circular(
+                                                                  12.r),
+                                                          topRight:
+                                                              Radius.circular(
+                                                                  12.r),
+                                                          bottomLeft:
+                                                              Radius.circular(
+                                                                  12.r),
+                                                          bottomRight:
+                                                              Radius.circular(
+                                                                  12.r),
+                                                        ),
+                                                        child:
+                                                            CachedNetworkImage(
+                                                          imageUrl:
+                                                              string ?? "",
+                                                          height: 145,
+                                                          width: 330
+                                                              .w
+                                                              .clamp(0, 330),
+                                                          fit: BoxFit.cover,
+                                                          placeholder: (context,
+                                                                  url) =>
+                                                              SpinKitThreeBounce(
+                                                            color: const Color
+                                                                .fromARGB(255,
+                                                                0, 239, 209),
+                                                            size: 50.0,
                                                           ),
-                                                          Text(
-                                                            hostels[index]
-                                                                .location,
-                                                            style: TextStyle(
-                                                              fontSize: 18
-                                                                  .sp
-                                                                  .clamp(0, 18),
-                                                              fontFamily:
-                                                                  "Poppins",
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .w500,
-                                                              letterSpacing:
-                                                                  0.15.w,
-                                                              color: const Color(
-                                                                  0xFF323232),
-                                                            ),
-                                                          )
-                                                        ],
-                                                      ),
-                                                      SizedBox(width: 5),
-                                                      Row(
-                                                        children: [
-                                                          Image.asset(
-                                                            "assets/home/roomIcon.png",
-                                                            height: 15.h,
-                                                            width: 22.w,
-                                                          ),
-                                                          Text(
-                                                            "  ${hostels[index].roomCapacity} in a room",
-                                                            style: TextStyle(
-                                                              fontSize: 16
-                                                                  .sp
-                                                                  .clamp(0, 16),
-                                                              fontFamily:
-                                                                  "Poppins",
-                                                              letterSpacing:
-                                                                  0.15.w,
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .w500,
-                                                              color: const Color(
-                                                                  0xFF323232),
-                                                            ),
-                                                          )
-                                                        ],
-                                                      )
-                                                    ],
-                                                  )
-                                                ],
-                                              ),
-                                              Expanded(
-                                                child: Container(
-                                                  // color: Colors.red,
-                                                  child: Column(
-                                                    crossAxisAlignment:
-                                                        CrossAxisAlignment.end,
-                                                    children: [
-                                                      Text(
-                                                        "start from",
-                                                        style: TextStyle(
-                                                          fontWeight:
-                                                              FontWeight.w500,
-                                                          fontSize: 12
-                                                              .sp
-                                                              .clamp(0, 12),
-                                                          color: const Color(
-                                                              0xFF323232),
+                                                          errorWidget: (context,
+                                                                  url, error) =>
+                                                              Icon(Icons.error),
                                                         ),
                                                       ),
-                                                      Row(children: [
-                                                        Text(
-                                                          "₵${hostels[index].price}",
+                                                    ),
+                                                    Positioned(
+                                                      top: 5.h,
+                                                      right: 5.h,
+                                                      // left: 0,
+                                                      child: GestureDetector(
+                                                        onTap: () {
+                                                          setState(
+                                                            () {},
+                                                          );
+                                                        },
+                                                        child: Container(
+                                                          height: 35.h,
+                                                          width: 35.w,
+                                                          decoration:
+                                                              const BoxDecoration(
+                                                            color: Colors.white,
+                                                            shape:
+                                                                BoxShape.circle,
+                                                          ),
+                                                          child: Icon(
+                                                            size: 20.h,
+                                                            topHostel.ispopular!
+                                                                ? Icons
+                                                                    .favorite_outlined
+                                                                : Icons
+                                                                    .favorite_border_outlined,
+                                                            color: const Color
+                                                                .fromARGB(255,
+                                                                0, 239, 209),
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ),
+                                                    Positioned(
+                                                      top: 0,
+                                                      left: 0,
+                                                      child: Container(
+                                                        padding:
+                                                            EdgeInsets.only(
+                                                                left: 5,
+                                                                right: 5),
+                                                        height: 16.h,
+                                                        // width: 45.w,
+                                                        decoration:
+                                                            BoxDecoration(
+                                                          color: const Color
+                                                              .fromRGBO(
+                                                              50, 50, 50, 0.5),
+                                                          borderRadius:
+                                                              BorderRadius.only(
+                                                            bottomRight:
+                                                                Radius.circular(
+                                                                    12.r),
+                                                            topLeft:
+                                                                Radius.circular(
+                                                                    12.r),
+                                                          ),
+                                                        ),
+                                                        child: Text(
+                                                          topHostel.ispopular!
+                                                              ? "popular"
+                                                              : "",
                                                           style: TextStyle(
-                                                            fontFamily: "Inter",
-                                                            fontWeight:
-                                                                FontWeight.bold,
-                                                            fontSize: 16
-                                                                .sp
-                                                                .clamp(0, 16),
-                                                            // letterSpacing:
-                                                            //     0.15,
-                                                            color: const Color(
-                                                                0xFF323232),
-                                                          ),
-                                                        ),
-                                                        Expanded(
-                                                          child: Text(
-                                                            "/Ac. year",
-                                                            style: TextStyle(
-                                                              color: const Color(
-                                                                  0xFF323232),
+                                                              fontSize: 12
+                                                                  .sp
+                                                                  .clamp(0, 12),
                                                               fontWeight:
                                                                   FontWeight
                                                                       .w500,
                                                               fontFamily:
-                                                                  "Poppins",
-                                                              fontSize: 10
-                                                                  .sp
-                                                                  .clamp(0, 10),
-                                                            ),
+                                                                  "Roboto"),
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                              SizedBox(height: 20),
+                                              SizedBox(
+                                                width: 330.w.clamp(0, 330),
+                                                child: Row(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment
+                                                          .spaceBetween,
+                                                  children: [
+                                                    Column(
+                                                      crossAxisAlignment:
+                                                          CrossAxisAlignment
+                                                              .start,
+                                                      children: [
+                                                        Text(
+                                                          topHostel.name,
+                                                          style: TextStyle(
+                                                            fontFamily:
+                                                                "Poppins",
+                                                            fontWeight:
+                                                                FontWeight.w600,
+                                                            fontSize: 20
+                                                                .sp
+                                                                .clamp(0, 22),
                                                           ),
                                                         ),
-                                                      ]),
-                                                      // SizedBox(
-                                                      //   height: 10.h,
-                                                      // ),
-                                                      Container(
-                                                        child: Row(
+                                                        Row(
                                                           mainAxisAlignment:
                                                               MainAxisAlignment
+                                                                  .spaceBetween,
+                                                          children: [
+                                                            Row(
+                                                              children: [
+                                                                Image.asset(
+                                                                  "assets/home/location.png",
+                                                                  height: 24,
+                                                                  width: 24
+                                                                      .sp
+                                                                      .clamp(0,
+                                                                          24),
+                                                                ),
+                                                                Text(
+                                                                  "${topHostel.city}",
+                                                                  style:
+                                                                      TextStyle(
+                                                                    fontSize: 18
+                                                                        .sp
+                                                                        .clamp(
+                                                                            0,
+                                                                            18),
+                                                                    fontFamily:
+                                                                        "Poppins",
+                                                                    fontWeight:
+                                                                        FontWeight
+                                                                            .w500,
+                                                                    letterSpacing:
+                                                                        0.15.w,
+                                                                    color: const Color(
+                                                                        0xFF323232),
+                                                                  ),
+                                                                )
+                                                              ],
+                                                            ),
+                                                            SizedBox(width: 5),
+                                                            Row(
+                                                              children: [
+                                                                Image.asset(
+                                                                  "assets/home/roomIcon.png",
+                                                                  height: 15.h,
+                                                                  width: 22.w,
+                                                                ),
+                                                                Text(
+                                                                  "  ${topHostel.available_rooms} in a room",
+                                                                  style:
+                                                                      TextStyle(
+                                                                    fontSize: 16
+                                                                        .sp
+                                                                        .clamp(
+                                                                            0,
+                                                                            16),
+                                                                    fontFamily:
+                                                                        "Poppins",
+                                                                    letterSpacing:
+                                                                        0.15.w,
+                                                                    fontWeight:
+                                                                        FontWeight
+                                                                            .w500,
+                                                                    color: const Color(
+                                                                        0xFF323232),
+                                                                  ),
+                                                                )
+                                                              ],
+                                                            )
+                                                          ],
+                                                        )
+                                                      ],
+                                                    ),
+                                                    Expanded(
+                                                      child: Container(
+                                                        // color: Colors.red,
+                                                        child: Column(
+                                                          crossAxisAlignment:
+                                                              CrossAxisAlignment
                                                                   .end,
                                                           children: [
-                                                            Icon(
-                                                              Icons
-                                                                  .star_outline,
-                                                              size: 17
-                                                                  .h
-                                                                  .clamp(0, 17),
-                                                              color: const Color
-                                                                  .fromARGB(
-                                                                255,
-                                                                0,
-                                                                239,
-                                                                209,
-                                                              ),
-                                                            ),
                                                             Text(
-                                                              hostels[index]
-                                                                  .rate,
+                                                              "start from",
                                                               style: TextStyle(
-                                                                fontSize: 15
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .w500,
+                                                                fontSize: 12
                                                                     .sp
                                                                     .clamp(
-                                                                        0, 15),
+                                                                        0, 12),
                                                                 color: const Color(
                                                                     0xFF323232),
+                                                              ),
+                                                            ),
+                                                            Row(children: [
+                                                              Text(
+                                                                "₵${topHostel.amt_per_year}",
+                                                                style:
+                                                                    TextStyle(
+                                                                  fontFamily:
+                                                                      "Inter",
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .bold,
+                                                                  fontSize: 16
+                                                                      .sp
+                                                                      .clamp(0,
+                                                                          16),
+                                                                  // letterSpacing:
+                                                                  //     0.15,
+                                                                  color: const Color(
+                                                                      0xFF323232),
+                                                                ),
+                                                              ),
+                                                              Expanded(
+                                                                child: Text(
+                                                                  "/Ac. year",
+                                                                  style:
+                                                                      TextStyle(
+                                                                    color: const Color(
+                                                                        0xFF323232),
+                                                                    fontWeight:
+                                                                        FontWeight
+                                                                            .w500,
+                                                                    fontFamily:
+                                                                        "Poppins",
+                                                                    fontSize: 10
+                                                                        .sp
+                                                                        .clamp(
+                                                                            0,
+                                                                            10),
+                                                                  ),
+                                                                ),
+                                                              ),
+                                                            ]),
+                                                            Container(
+                                                              child: Row(
+                                                                mainAxisAlignment:
+                                                                    MainAxisAlignment
+                                                                        .end,
+                                                                children: [
+                                                                  Icon(
+                                                                    Icons
+                                                                        .star_outline,
+                                                                    size: 17
+                                                                        .h
+                                                                        .clamp(
+                                                                            0,
+                                                                            17),
+                                                                    color: const Color
+                                                                        .fromARGB(
+                                                                      255,
+                                                                      0,
+                                                                      239,
+                                                                      209,
+                                                                    ),
+                                                                  ),
+                                                                  Text(
+                                                                    "${topHostel.rate}",
+                                                                    style:
+                                                                        TextStyle(
+                                                                      fontSize: 15
+                                                                          .sp
+                                                                          .clamp(
+                                                                              0,
+                                                                              15),
+                                                                      color: const Color(
+                                                                          0xFF323232),
+                                                                    ),
+                                                                  )
+                                                                ],
                                                               ),
                                                             )
                                                           ],
                                                         ),
-                                                      )
-                                                    ],
-                                                  ),
+                                                      ),
+                                                    )
+                                                  ],
                                                 ),
-                                              )
+                                              ),
+                                              SizedBox(height: 20),
                                             ],
                                           ),
                                         ),
-                                        SizedBox(height: 20),
-                                      ],
+                                      ),
                                     ),
-                                  ),
-                                );
-                              }
-                              return null;
-                            },
-                          ),
-                        ),
+                                  );
+                                })
+
+                                    // if (topHostels[index].gender == "male") {
+
+                                    ),
+                              ),
+
                         Container(
                           margin: EdgeInsets.symmetric(horizontal: 25.h),
                           width: 380.w,
@@ -1310,192 +1478,214 @@ class _HomeState extends State<Home> {
                           ),
                         ),
                         SizedBox(height: 20),
-                        SizedBox(
-                          // margin: EdgeInsets.only(bottom: 5.h),
-                          // color: Colors.red,
-                          height: 230.h,
-                          // width: 225.w,
-                          width: MediaQuery.of(context).size.width,
-                          child: ListView.builder(
-                            scrollDirection: Axis.horizontal,
-                            physics: const BouncingScrollPhysics(),
-                            itemCount: viewedHostels.length,
-                            itemBuilder: (context, index) {
-                              return Row(
-                                children: [
-                                  SizedBox(
-                                    width: 25.h,
-                                  ),
-                                  Container(
-                                    // height: 215.h,
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.only(
-                                        topRight: Radius.circular(12.r),
-                                        topLeft: Radius.circular(12.r),
-                                        bottomLeft: Radius.circular(28.r),
-                                        bottomRight: Radius.circular(28.r),
-                                      ),
-                                      color: Colors.white,
-                                      boxShadow: [
-                                        BoxShadow(
-                                          offset: const Offset(0, 1),
-                                          blurRadius: 4,
-                                          color: Colors.black.withOpacity(0.25),
-                                        )
-                                      ],
-                                    ),
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
+                        isLoading
+                            ? Center(
+                                child: SpinKitThreeBounce(
+                                  color: const Color.fromARGB(255, 0, 239, 209),
+                                  size: 50.0,
+                                ),
+                              )
+                            : SizedBox(
+                                // margin: EdgeInsets.only(bottom: 5.h),
+                                // color: Colors.red,
+                                height: 230.h,
+                                // width: 225.w,
+                                width: MediaQuery.of(context).size.width,
+                                child: ListView.builder(
+                                  scrollDirection: Axis.horizontal,
+                                  physics: const BouncingScrollPhysics(),
+                                  itemCount: hostels.length,
+                                  itemBuilder: (context, index) {
+                                    return Row(
                                       children: [
                                         SizedBox(
-                                          height: 166.h,
-                                          width: 245.w.clamp(0, 245),
-                                          child: Stack(
-                                            children: [
-                                              Positioned(
-                                                top: 0,
-                                                right: 0,
-                                                left: 0,
-                                                child: Container(
-                                                  height: 166.h,
-                                                  width: 245.w,
-                                                  decoration: BoxDecoration(
-                                                    // color: Colors.brown,
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            12.r),
-                                                  ),
-                                                  child: Image.asset(
-                                                      viewedHostels[index]
-                                                          .imageUrl,
-                                                      height: 165.h,
-                                                      width: 225.w,
-                                                      fit: BoxFit.fill),
-                                                ),
-                                              ),
-                                              Positioned(
-                                                top: 5.h,
-                                                right: 5.h,
-                                                // left: 0,
-                                                child: GestureDetector(
-                                                  onTap: () {
-                                                    setState(
-                                                      () {
-                                                        favorite = !favorite;
-                                                      },
-                                                    );
-                                                  },
-                                                  child: Container(
-                                                    height: 35.h,
-                                                    width: 35.w,
-                                                    decoration:
-                                                        const BoxDecoration(
-                                                      color: Colors.white,
-                                                      shape: BoxShape.circle,
-                                                    ),
-                                                    child: Icon(
-                                                      size: 20.h,
-                                                      favorite
-                                                          ? Icons
-                                                              .favorite_outlined
-                                                          : Icons
-                                                              .favorite_border_outlined,
-                                                      color:
-                                                          const Color.fromARGB(
-                                                              255, 0, 239, 209),
-                                                    ),
-                                                  ),
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                        SizedBox(
-                                          height: 5.h,
+                                          width: 25.h,
                                         ),
                                         Container(
-                                          // color: Colors.green,
-                                          padding: EdgeInsets.only(left: 15.h),
+                                          // height: 215.h,
+                                          decoration: BoxDecoration(
+                                            borderRadius: BorderRadius.only(
+                                              topRight: Radius.circular(12.r),
+                                              topLeft: Radius.circular(12.r),
+                                              bottomLeft: Radius.circular(28.r),
+                                              bottomRight:
+                                                  Radius.circular(28.r),
+                                            ),
+                                            color: Colors.white,
+                                            boxShadow: [
+                                              BoxShadow(
+                                                offset: const Offset(0, 1),
+                                                blurRadius: 4,
+                                                color: Colors.black
+                                                    .withOpacity(0.25),
+                                              )
+                                            ],
+                                          ),
                                           child: Column(
                                             crossAxisAlignment:
                                                 CrossAxisAlignment.start,
                                             children: [
-                                              Text(
-                                                viewedHostels[index].hotelName,
-                                                style: TextStyle(
-                                                    color: const Color.fromARGB(
-                                                        150, 0, 0, 0),
-                                                    fontSize:
-                                                        18.sp.clamp(0, 18),
-                                                    fontWeight: FontWeight.w600,
-                                                    fontFamily: "Poppins"),
-                                              ),
-                                              Row(
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment
-                                                        .spaceBetween,
-                                                children: [
-                                                  Row(
-                                                    children: [
-                                                      Image.asset(
-                                                        "assets/home/location.png",
-                                                        height: 24.h,
-                                                        width: 24.w,
+                                              SizedBox(
+                                                height: 166.h,
+                                                width: 245.w.clamp(0, 245),
+                                                child: Stack(
+                                                  children: [
+                                                    Positioned(
+                                                      top: 0,
+                                                      right: 0,
+                                                      left: 0,
+                                                      child: Container(
+                                                        height: 166.h,
+                                                        width: 245.w,
+                                                        decoration:
+                                                            BoxDecoration(
+                                                          // color: Colors.brown,
+                                                          borderRadius:
+                                                              BorderRadius
+                                                                  .circular(
+                                                                      12.r),
+                                                        ),
+                                                        child: Image.asset("",
+                                                            height: 165.h,
+                                                            width: 225.w,
+                                                            fit: BoxFit.fill),
                                                       ),
-                                                      Text(
-                                                        hostels[index].location,
-                                                        style: TextStyle(
+                                                    ),
+                                                    Positioned(
+                                                      top: 5.h,
+                                                      right: 5.h,
+                                                      // left: 0,
+                                                      child: GestureDetector(
+                                                        onTap: () {
+                                                          setState(
+                                                            () {
+                                                              favorite =
+                                                                  !favorite;
+                                                            },
+                                                          );
+                                                        },
+                                                        child: Container(
+                                                          height: 35.h,
+                                                          width: 35.w,
+                                                          decoration:
+                                                              const BoxDecoration(
+                                                            color: Colors.white,
+                                                            shape:
+                                                                BoxShape.circle,
+                                                          ),
+                                                          child: Icon(
+                                                            size: 20.h,
+                                                            favorite
+                                                                ? Icons
+                                                                    .favorite_outlined
+                                                                : Icons
+                                                                    .favorite_border_outlined,
+                                                            color: const Color
+                                                                .fromARGB(255,
+                                                                0, 239, 209),
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                              SizedBox(
+                                                height: 5.h,
+                                              ),
+                                              Container(
+                                                // color: Colors.green,
+                                                padding:
+                                                    EdgeInsets.only(left: 15.h),
+                                                child: Column(
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.start,
+                                                  children: [
+                                                    Text(
+                                                      hostels[index].name,
+                                                      style: TextStyle(
+                                                          color: const Color
+                                                              .fromARGB(
+                                                              150, 0, 0, 0),
                                                           fontSize: 18
                                                               .sp
                                                               .clamp(0, 18),
                                                           fontWeight:
-                                                              FontWeight.w500,
-                                                          fontFamily: "Poppins",
-                                                          color: const Color(
-                                                              0xFF323232),
+                                                              FontWeight.w600,
+                                                          fontFamily:
+                                                              "Poppins"),
+                                                    ),
+                                                    Row(
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment
+                                                              .spaceBetween,
+                                                      children: [
+                                                        Row(
+                                                          children: [
+                                                            Image.asset(
+                                                              "assets/home/location.png",
+                                                              height: 24.h,
+                                                              width: 24.w,
+                                                            ),
+                                                            Text(
+                                                              hostels[index]
+                                                                  .name,
+                                                              style: TextStyle(
+                                                                fontSize: 18
+                                                                    .sp
+                                                                    .clamp(
+                                                                        0, 18),
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .w500,
+                                                                fontFamily:
+                                                                    "Poppins",
+                                                                color: const Color(
+                                                                    0xFF323232),
+                                                              ),
+                                                            )
+                                                          ],
                                                         ),
-                                                      )
-                                                    ],
-                                                  ),
-                                                  SizedBox(
-                                                    width: 20.w,
-                                                  ),
-                                                  Row(
-                                                    children: [
-                                                      Icon(
-                                                        Icons.star_outline,
-                                                        size: 17.h,
-                                                        color: const Color
-                                                            .fromARGB(
-                                                            255, 0, 239, 209),
-                                                      ),
-                                                      Text(
-                                                        viewedHostels[index]
-                                                            .rate,
-                                                        style: TextStyle(
-                                                          fontSize: 18
-                                                              .sp
-                                                              .clamp(0, 18),
-                                                          color: const Color(
-                                                              0xFF323232),
+                                                        SizedBox(
+                                                          width: 20.w,
                                                         ),
-                                                      )
-                                                    ],
-                                                  )
-                                                ],
+                                                        Row(
+                                                          children: [
+                                                            Icon(
+                                                              Icons
+                                                                  .star_outline,
+                                                              size: 17.h,
+                                                              color: const Color
+                                                                  .fromARGB(255,
+                                                                  0, 239, 209),
+                                                            ),
+                                                            Text(
+                                                              hostels[index]
+                                                                  .name,
+                                                              style: TextStyle(
+                                                                fontSize: 18
+                                                                    .sp
+                                                                    .clamp(
+                                                                        0, 18),
+                                                                color: const Color(
+                                                                    0xFF323232),
+                                                              ),
+                                                            )
+                                                          ],
+                                                        )
+                                                      ],
+                                                    )
+                                                  ],
+                                                ),
                                               )
                                             ],
                                           ),
-                                        )
+                                        ),
                                       ],
-                                    ),
-                                  ),
-                                ],
-                              );
-                            },
-                          ),
-                        ),
+                                    );
+                                  },
+                                ),
+                              ),
                         SizedBox(
                           height: 20,
                         ),
@@ -1572,7 +1762,6 @@ class _HomeState extends State<Home> {
                                               BorderRadius.circular(10.r),
                                         ),
                                         child: Row(
-                                          // mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                           children: [
                                             const Icon(
                                               Icons.search,

@@ -1,13 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:on_campus/screens/Home%20Page%20Views/payment.dart';
-import 'package:on_campus/screens/Home%20Page%20Views/compare.dart';
-import 'package:on_campus/screens/Home%20Page%20Views/home.dart';
-import 'package:on_campus/screens/Home%20Page%20Views/profile.dart';
 import 'package:on_campus/screens/apartment_history.dart';
-import 'package:on_campus/temps/clipper.dart';
-
 import 'view_room_details.dart';
 
 class Apartment extends StatefulWidget {

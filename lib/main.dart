@@ -1,12 +1,19 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:on_campus/classes/screen_details.dart';
+import 'package:on_campus/screens/initialPage_0.dart';
 import 'package:on_campus/screens/initial_page.dart';
-import 'package:on_campus/screens/welcome_page_views.dart';
+import 'package:on_campus/firebase_options.dart';
 
-void main() {
+void main() async {
   runApp(const MyApp());
+  // DependencyInjection.init();
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -43,7 +50,7 @@ class _StartupScreenState extends State<StartupScreen> {
   @override
   void initState() {
     super.initState();
-    future = Future.delayed(const Duration(seconds: 3));
+    future = Future.delayed(const Duration(milliseconds: 100));
   }
 
   final PageController pageController = PageController();
@@ -64,7 +71,7 @@ class _StartupScreenState extends State<StartupScreen> {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return const InitialPage();
               }
-              return const WelcomePageViews();
+              return const Initialpage0();
             },
           ),
         );

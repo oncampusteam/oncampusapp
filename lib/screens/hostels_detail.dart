@@ -1,24 +1,31 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:flutter_swiper_null_safety/flutter_swiper_null_safety.dart';
 import 'package:get/get.dart';
 import 'package:on_campus/classes/classes.dart';
-// import 'package:on_campus/screens/Home%20Page%20Views/apartment.dart';
+import 'package:on_campus/firebase/classes.dart';
 import 'package:on_campus/screens/Home%20Page%20Views/payment.dart';
-// import 'package:on_campus1/classes/classes.dart';
 
-class HostelDeails extends StatefulWidget {
+class HostelDetails extends StatefulWidget {
   final String username;
-  const HostelDeails({super.key, required this.username});
+  final Hostels hostel;
+  const HostelDetails({
+    super.key,
+    required this.username,
+    required this.hostel,
+  });
 
   @override
-  State<HostelDeails> createState() => _HostelDeailsState();
+  State<HostelDetails> createState() => _HostelDetailsState();
 }
 
 int number = 0;
 int gender = 0;
 int duration = 0;
 
-class _HostelDeailsState extends State<HostelDeails> {
+class _HostelDetailsState extends State<HostelDetails> {
   int selectedIndex = 0;
   List<Photos> tileList = [
     Photos(name: "Overview"),
@@ -26,6 +33,13 @@ class _HostelDeailsState extends State<HostelDeails> {
     Photos(name: "Amenities"),
     Photos(name: "Room type"),
     Photos(name: "Policies"),
+  ];
+  List<Swipper> swipers = [
+    Swipper(image: "assets/search/search_imgs.jpeg"),
+    Swipper(image: "assets/search/search_imgs_1.jpeg"),
+    Swipper(image: "assets/search/search_imgs_2.jpeg"),
+    Swipper(image: "assets/search/search_imgs_3.jpeg"),
+    Swipper(image: "assets/search/search_imgs_4.jpeg"),
   ];
   double height = 0;
   bool bookNow = false;
@@ -226,25 +240,36 @@ class _HostelDeailsState extends State<HostelDeails> {
                   Row(
                     children: [
                       Container(
-                          height: 30.h,
-                          width: 30.w,
-                          decoration: BoxDecoration(
-                              color: Colors.white,
-                              shape: BoxShape.circle,
-                              boxShadow: [
-                                BoxShadow(
-                                    blurRadius: 10,
-                                    offset: const Offset(0, 4),
-                                    color: Colors.black.withOpacity(0.05))
-                              ]),
-                          child: const Align(
-                              child: Text("-",
-                                  style: TextStyle(color: Color(0xFF00EFD1))))),
+                        height: 30.h,
+                        width: 30.w,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              blurRadius: 10,
+                              offset: const Offset(0, 4),
+                              color: Colors.black.withOpacity(0.05),
+                            ),
+                          ],
+                        ),
+                        child: const Align(
+                          child: Text(
+                            "-",
+                            style: TextStyle(
+                              color: Color(0xFF00EFD1),
+                            ),
+                          ),
+                        ),
+                      ),
                       5.horizontalSpace,
-                      Text("$number",
-                          style: TextStyle(
-                              fontSize: 16.sp.clamp(0, 16),
-                              fontWeight: FontWeight.w500)),
+                      Text(
+                        "$number",
+                        style: TextStyle(
+                          fontSize: 16.sp.clamp(0, 16),
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
                       5.horizontalSpace,
                       Container(
                           height: 30.h,
@@ -373,7 +398,8 @@ class _HostelDeailsState extends State<HostelDeails> {
                     children: [
                       Image.asset("assets/hostels_detail/location.png",
                           height: 12.h, width: 10.w),
-                      Text("1995 Broadway, Kumasi",
+                      Text(
+                          "${widget.hostel.city}, ${widget.hostel.region} Region",
                           style: TextStyle(
                             fontFamily: "Roboto",
                             fontSize: 10.sp.clamp(0, 10),
@@ -576,15 +602,36 @@ class _HostelDeailsState extends State<HostelDeails> {
                       Stack(
                         children: [
                           Container(
+                            height: 400.h,
+                            width: MediaQuery.of(context).size.width,
                             color: const Color(0xFFF5F8FF),
                             child: ClipRRect(
                               borderRadius: BorderRadius.circular(20.r),
-                              child: Image.asset(
-                                'assets/hostels_detail/hostel-1.png',
-                                height: 400.h,
-                                width: double.infinity,
-                                fit: BoxFit.cover,
-                              ),
+                              child: Swiper(
+                                  controller: SwiperController(),
+                                  autoplay: true,
+                                  curve: Curves.easeIn,
+                                  autoplayDelay: 5000,
+                                  itemCount:
+                                      widget.hostel.hostel_images!.length,
+                                  itemBuilder: (BuildContext, index) {
+                                    // Swipper swiper = swipers[index];
+                                    String? string =
+                                        widget.hostel.hostel_images![index];
+                                    return CachedNetworkImage(
+                                      imageUrl: string ?? "",
+                                      width: MediaQuery.sizeOf(context).width,
+                                      fit: BoxFit.cover,
+                                      placeholder: (context, url) =>
+                                          SpinKitThreeBounce(
+                                        color: const Color.fromARGB(
+                                            255, 0, 239, 209),
+                                        size: 50.0,
+                                      ),
+                                      errorWidget: (context, url, error) =>
+                                          Icon(Icons.error),
+                                    );
+                                  }),
                             ),
                           ),
                           SizedBox(
@@ -597,22 +644,24 @@ class _HostelDeailsState extends State<HostelDeails> {
                                   mainAxisAlignment:
                                       MainAxisAlignment.spaceBetween,
                                   children: [
-                                    Container(
-                                      margin: EdgeInsets.only(left: 20.h),
-                                      height: 40.h,
-                                      width: 40,
-                                      foregroundDecoration: BoxDecoration(
-                                          color: Colors.black.withOpacity(0.1),
-                                          borderRadius:
-                                              BorderRadius.circular(8.r)),
-                                      decoration: BoxDecoration(
-                                          color: Colors.white.withOpacity(0.8),
-                                          borderRadius:
-                                              BorderRadius.circular(8.r)),
-                                      child: GestureDetector(
-                                        onTap: () {
-                                          Navigator.pop(context);
-                                        },
+                                    GestureDetector(
+                                      onTap: () {
+                                        Navigator.pop(context);
+                                      },
+                                      child: Container(
+                                        margin: EdgeInsets.only(left: 20.h),
+                                        height: 40.h,
+                                        width: 40,
+                                        foregroundDecoration: BoxDecoration(
+                                            color:
+                                                Colors.black.withOpacity(0.1),
+                                            borderRadius:
+                                                BorderRadius.circular(8.r)),
+                                        decoration: BoxDecoration(
+                                            color:
+                                                Colors.white.withOpacity(0.8),
+                                            borderRadius:
+                                                BorderRadius.circular(8.r)),
                                         child: Icon(Icons.chevron_left,
                                             color: Colors.black, size: 24),
                                       ),
@@ -675,7 +724,7 @@ class _HostelDeailsState extends State<HostelDeails> {
                                               CrossAxisAlignment.start,
                                           children: [
                                             Text(
-                                              "Ultimate Hostel",
+                                              widget.hostel.name,
                                               style: TextStyle(
                                                 fontFamily: "Poppins",
                                                 color: Colors.white,
@@ -704,7 +753,7 @@ class _HostelDeailsState extends State<HostelDeails> {
                                                               width: 15.w.clamp(
                                                                   0, 15))),
                                                       Text(
-                                                        "1995 Broadway, Kenyase Kumasi",
+                                                        "${widget.hostel.city}, ${widget.hostel.region} Region",
                                                         style: TextStyle(
                                                           fontFamily: "Roboto",
                                                           fontWeight:
@@ -717,42 +766,42 @@ class _HostelDeailsState extends State<HostelDeails> {
                                                       ),
                                                     ],
                                                   ),
-                                                  Container(
-                                                      margin: EdgeInsets.only(
-                                                          left: 7.h),
-                                                      height: 10.h,
-                                                      width: 1.w,
-                                                      color: Colors.white),
-                                                  Row(
-                                                    children: [
-                                                      Container(
-                                                          margin:
-                                                              EdgeInsets.only(
-                                                                  left: 1.h),
-                                                          child: Image.asset(
-                                                              'assets/hostels_detail/University_white.png',
-                                                              height: 15.h,
-                                                              width: 15.w.clamp(
-                                                                  0, 15))),
-                                                      SizedBox(width: 5.w),
-                                                      SizedBox(
-                                                        height: 22.h,
-                                                        child: Text(
-                                                          "Main Campus, University of Ghana\nAccra",
-                                                          style: TextStyle(
-                                                            fontFamily:
-                                                                "Roboto",
-                                                            fontWeight:
-                                                                FontWeight.w500,
-                                                            color: Colors.white,
-                                                            fontSize: 12
-                                                                .sp
-                                                                .clamp(0, 12),
-                                                          ),
-                                                        ),
-                                                      ),
-                                                    ],
-                                                  ),
+                                                  // Container(
+                                                  //     margin: EdgeInsets.only(
+                                                  //         left: 7.h),
+                                                  //     height: 10.h,
+                                                  //     width: 1.w,
+                                                  //     color: Colors.white),
+                                                  // Row(
+                                                  //   children: [
+                                                  //     Container(
+                                                  //         margin:
+                                                  //             EdgeInsets.only(
+                                                  //                 left: 1.h),
+                                                  //         child: Image.asset(
+                                                  //             'assets/hostels_detail/University_white.png',
+                                                  //             height: 15.h,
+                                                  //             width: 15.w.clamp(
+                                                  //                 0, 15))),
+                                                  //     SizedBox(width: 5.w),
+                                                  //     SizedBox(
+                                                  //       height: 22.h,
+                                                  //       child: Text(
+                                                  //         "Main Campus, University of Ghana\nAccra",
+                                                  //         style: TextStyle(
+                                                  //           fontFamily:
+                                                  //               "Roboto",
+                                                  //           fontWeight:
+                                                  //               FontWeight.w500,
+                                                  //           color: Colors.white,
+                                                  //           fontSize: 12
+                                                  //               .sp
+                                                  //               .clamp(0, 12),
+                                                  //         ),
+                                                  //       ),
+                                                  //     ),
+                                                  //   ],
+                                                  // ),
                                                   // SizedBox(height: 5.h),
                                                   Row(
                                                     mainAxisAlignment:
@@ -763,7 +812,8 @@ class _HostelDeailsState extends State<HostelDeails> {
                                                               .directions_walk_sharp,
                                                           color: Colors.white),
                                                       Text(
-                                                        " 1 hour 08 min",
+                                                        // " 1 hour 08 min",
+                                                        "${widget.hostel.distance_walk} mins",
                                                         style: TextStyle(
                                                           fontFamily: "Roboto",
                                                           fontWeight:
@@ -781,7 +831,7 @@ class _HostelDeailsState extends State<HostelDeails> {
                                                         height: 15.h,
                                                       ),
                                                       Text(
-                                                        " 35 min",
+                                                        " ${widget.hostel.distance_car} mins",
                                                         style: TextStyle(
                                                           color: Colors.white,
                                                           fontSize: 11
@@ -795,7 +845,7 @@ class _HostelDeailsState extends State<HostelDeails> {
                                                           height: 15.h,
                                                           width: 15.w),
                                                       Text(
-                                                        " 45 min",
+                                                        " ${widget.hostel.distance_car} mins",
                                                         style: TextStyle(
                                                           color: Colors.white,
                                                           fontSize: 11

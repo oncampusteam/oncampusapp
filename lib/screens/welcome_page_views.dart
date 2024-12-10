@@ -131,7 +131,7 @@ class _WelcomePageViewsState extends State<WelcomePageViews>
                             //     .push(MaterialPageRoute(builder: (context) {
                             //   return const Loginpage();
                             // }));
-                            Get.to(() => const Loginpage(),
+                            Get.to(() => const LoginPage(index: 0),
                                 transition: Transition.fadeIn,
                                 curve: Curves.easeIn,
                                 duration: const Duration(milliseconds: 600));

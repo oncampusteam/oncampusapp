@@ -197,7 +197,6 @@ class _SearchState extends State<Search> {
                                     obscureText: false,
                                     enableSuggestions: true,
                                     autocorrect: true,
-
                                     cursorColor: Colors.grey,
                                     style: TextStyle(
                                         color: Colors.grey,
@@ -243,7 +242,7 @@ class _SearchState extends State<Search> {
               )),
           // Second item (container) overlapping the first item
           Positioned(
-            top: 180.h, // Adjust this value to control the overlap
+            // top: 180.h, // Adjust this value to control the overlap
             child: Container(
               width: MediaQuery.sizeOf(context).width,
               // height: 100,

@@ -2,7 +2,13 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:get/get.dart';
+import 'package:loading_indicator/loading_indicator.dart';
+import 'package:lottie/lottie.dart';
+import 'package:on_campus/firebase/classes.dart';
+import 'package:on_campus/firebase/constants.dart';
+import 'package:on_campus/firebase/firestore_db.dart';
 import 'package:on_campus/screens/Home%20Page%20Views/home.dart';
 import 'package:on_campus/screens/select_category.dart';
 
@@ -18,18 +24,32 @@ class _PickcampusState extends State<Pickcampus> {
   TextEditingController searchController = TextEditingController();
   int selectedIndex = 0;
   bool pop = false;
-  List<String> cities = [
-    "Greater Accra",
-    "Ashanti Region",
-    "Western Region",
-    "Cape Coast",
-    "Takoradi",
-    "Northen Region",
-    "Upper East Region",
-    "Volta Region",
-    "Upper West Region"
-  ];
+  List<Regions> regions = [];
   int index = 0;
+  bool isLoading = false;
+
+  void getRegions() async {
+    setState(() {
+      isLoading = true;
+    });
+    // showLoaderDialog(context);
+    List<Regions> awaitRegions = await FirestoreDb.instance.getRegions(context);
+
+    if (awaitRegions.isNotEmpty) {
+      setState(() {
+        regions = awaitRegions;
+        isLoading = false;
+      });
+    }
+    ;
+    // Navigator.of(context).pop();
+  }
+
+  void initState() {
+    super.initState();
+    getRegions();
+  }
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -44,7 +64,6 @@ class _PickcampusState extends State<Pickcampus> {
                 });
               },
               child: Container(
-                // padding: EdgeInsets.symmetric(horizontal: 20.h),
                 margin: EdgeInsets.only(bottom: 50.h, left: 20.w, right: 20.w),
                 height: 45,
                 decoration: BoxDecoration(
@@ -53,7 +72,6 @@ class _PickcampusState extends State<Pickcampus> {
                     Radius.circular(10.r),
                   ),
                 ),
-                // padding: EdgeInsets.only(left: 10.w),
                 width: 330.w,
                 child: Align(
                   child: Text(
@@ -116,55 +134,64 @@ class _PickcampusState extends State<Pickcampus> {
                       ),
                     ),
                     SizedBox(height: 10),
-                    SizedBox(
-                      height: 50,
-                      child: ListView.builder(
-                        scrollDirection: Axis.horizontal,
-                        itemCount: cities.length,
-                        itemBuilder: (BuildContext context, int index) {
-                          index = index;
-                          return Center(
-                            child: GestureDetector(
-                              onTap: () {
-                                setState(() {
-                                  selectedIndex = index;
-                                  debugPrint(
-                                      "this is the value of selected :$selectedIndex");
-                                });
-                              },
-                              child: AnimatedContainer(
-                                duration: const Duration(milliseconds: 600),
-                                margin: EdgeInsets.only(right: 10.h, left: 5.h),
-                                padding: EdgeInsets.symmetric(
-                                  vertical: 10,
-                                ),
-                                decoration: BoxDecoration(
-                                  border: selectedIndex == index
-                                      ? Border(
-                                          bottom: BorderSide(
-                                            color: const Color.fromARGB(
-                                                255, 0, 239, 209),
-                                            width: 1,
+                    isLoading
+                        ? Center(
+                            child: SpinKitThreeBounce(
+                              color: const Color.fromARGB(255, 0, 239, 209),
+                              size: 50.0,
+                            ),
+                          )
+                        : SizedBox(
+                            height: 50,
+                            child: ListView.builder(
+                              scrollDirection: Axis.horizontal,
+                              itemCount: regions.length,
+                              itemBuilder: (BuildContext context, int index) {
+                                Regions reg = regions[index];
+                                return Center(
+                                  child: GestureDetector(
+                                    onTap: () {
+                                      setState(() {
+                                        selectedIndex = index;
+                                        debugPrint(
+                                            "this is the value of selected :r ${reg.name}");
+                                      });
+                                    },
+                                    child: AnimatedContainer(
+                                      duration:
+                                          const Duration(milliseconds: 600),
+                                      margin: EdgeInsets.only(
+                                          right: 10.h, left: 5.h),
+                                      padding: EdgeInsets.symmetric(
+                                        vertical: 10,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        border: selectedIndex == index
+                                            ? Border(
+                                                bottom: BorderSide(
+                                                  color: const Color.fromARGB(
+                                                      255, 0, 239, 209),
+                                                  width: 1,
+                                                ),
+                                              )
+                                            : null,
+                                      ),
+                                      child: SizedBox(
+                                        child: Text(
+                                          reg.name,
+                                          style: TextStyle(
+                                            color: Colors.black,
+                                            fontFamily: "Poppins",
+                                            fontSize: 15.sp.clamp(0, 15),
                                           ),
-                                        )
-                                      : null,
-                                ),
-                                child: SizedBox(
-                                  child: Text(
-                                    cities[index],
-                                    style: TextStyle(
-                                      color: Colors.black,
-                                      fontFamily: "Poppins",
-                                      fontSize: 15.sp.clamp(0, 15),
+                                        ),
+                                      ),
                                     ),
                                   ),
-                                ),
-                              ),
+                                );
+                              },
                             ),
-                          );
-                        },
-                      ),
-                    ),
+                          ),
                     SizedBox(
                       height: 10,
                     ),
@@ -179,16 +206,23 @@ class _PickcampusState extends State<Pickcampus> {
                         SizedBox(
                           width: 5.w,
                         ),
-                        Expanded(
-                          child: Text(
-                            "Popular University in ${cities[selectedIndex]}",
-                            style: TextStyle(
-                                color: Colors.black,
-                                fontFamily: "Poppins",
-                                fontSize: 20.sp.clamp(0, 20),
-                                fontWeight: FontWeight.w600),
-                          ),
-                        ),
+                        isLoading
+                            ? Center(
+                                child: SpinKitThreeBounce(
+                                  color: const Color.fromARGB(255, 0, 239, 209),
+                                  size: 50.0,
+                                ),
+                              )
+                            : Expanded(
+                                child: Text(
+                                  "Popular Universities in ${regions[selectedIndex].name}",
+                                  style: TextStyle(
+                                      color: Colors.black,
+                                      fontFamily: "Poppins",
+                                      fontSize: 20.sp.clamp(0, 20),
+                                      fontWeight: FontWeight.w600),
+                                ),
+                              ),
                       ],
                     ))
                   ],

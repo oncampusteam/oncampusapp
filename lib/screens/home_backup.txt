@@ -137,7 +137,7 @@ class _CompareState extends State<Compare> {
                                       color: const Color.fromARGB(80, 0, 0, 0),
                                       fontFamily: "Roboto",
                                       fontSize: 12.sp,
-                                    ))),
+                                    ),),),
                           ),
                           SizedBox(
                             height: 5.h,

@@ -43,7 +43,7 @@ class _WelcomeScreen1State extends State<WelcomeScreen1> {
                               color: Colors.white,
                               fontWeight: FontWeight.w600,
                               fontFamily: "Poppins",
-                              fontSize: 30.sp.clamp(0, 30),
+                              fontSize: 35.sp.clamp(0, 35),
                             )),
                       ),
                     ),
@@ -53,7 +53,7 @@ class _WelcomeScreen1State extends State<WelcomeScreen1> {
                     SizedBox(
                       width: double.infinity,
                       child: Text(
-                          "Book in flash, save your cash! find the perfect spot without hassle",
+                          "Book in flash, save your cash! find the perfect\n spot without hassle",
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             letterSpacing: 0.15.w,
@@ -61,7 +61,7 @@ class _WelcomeScreen1State extends State<WelcomeScreen1> {
                             color: Colors.white,
                             fontWeight: FontWeight.w500,
                             fontFamily: "Poppins",
-                            fontSize: 16.sp.clamp(0, 16),
+                            fontSize: 18.sp.clamp(0, 18),
                           )),
                     ),
                   ],
