@@ -1,0 +1,206 @@
+{
+  "project_info": {
+    "project_number": "116893640761",
+    "project_id": "on-campus-d0cb6",
+    "storage_bucket": "on-campus-d0cb6.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:116893640761:android:d363b35d020cfc330485e8",
+        "android_client_info": {
+          "package_name": "com.example.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "116893640761-omfcbe890c7k17fqv7kmv1sdjjac1ds1.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBFrDM-eEEexV0DzxWRvLV8KCtsXasaka8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "116893640761-omfcbe890c7k17fqv7kmv1sdjjac1ds1.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "116893640761-hivl32mu2ohr9fanbb791immrutkeb11.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.onCampus"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:116893640761:android:9a539eb04e9d170c0485e8",
+        "android_client_info": {
+          "package_name": "com.example.on_campus"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "116893640761-omfcbe890c7k17fqv7kmv1sdjjac1ds1.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBFrDM-eEEexV0DzxWRvLV8KCtsXasaka8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "116893640761-omfcbe890c7k17fqv7kmv1sdjjac1ds1.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "116893640761-hivl32mu2ohr9fanbb791immrutkeb11.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.onCampus"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:116893640761:android:3f259094a3e7cd9b0485e8",
+        "android_client_info": {
+          "package_name": "com.onCampus.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "116893640761-omfcbe890c7k17fqv7kmv1sdjjac1ds1.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBFrDM-eEEexV0DzxWRvLV8KCtsXasaka8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "116893640761-omfcbe890c7k17fqv7kmv1sdjjac1ds1.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "116893640761-hivl32mu2ohr9fanbb791immrutkeb11.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.onCampus"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:116893640761:android:14c4a85dac40c9800485e8",
+        "android_client_info": {
+          "package_name": "com.on_campus.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "116893640761-9kdhn6lb1i32eqq7f4bg8oa1u9um2r2v.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.on_campus.app",
+            "certificate_hash": "34c76fa57f1eba02abd0682b15633130acd8d1f2"
+          }
+        },
+        {
+          "client_id": "116893640761-omfcbe890c7k17fqv7kmv1sdjjac1ds1.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBFrDM-eEEexV0DzxWRvLV8KCtsXasaka8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "116893640761-omfcbe890c7k17fqv7kmv1sdjjac1ds1.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "116893640761-hivl32mu2ohr9fanbb791immrutkeb11.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.onCampus"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:116893640761:android:d97cb6cef1f3426a0485e8",
+        "android_client_info": {
+          "package_name": "com.oncampus.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "116893640761-abjgs0vnpnbo42dic5scrrgii1fokidm.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.oncampus.app",
+            "certificate_hash": "fcf89eaca9067b358ed41ded8a1694ff663fc9ef"
+          }
+        },
+        {
+          "client_id": "116893640761-omfcbe890c7k17fqv7kmv1sdjjac1ds1.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBFrDM-eEEexV0DzxWRvLV8KCtsXasaka8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "116893640761-omfcbe890c7k17fqv7kmv1sdjjac1ds1.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "116893640761-hivl32mu2ohr9fanbb791immrutkeb11.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.onCampus"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
